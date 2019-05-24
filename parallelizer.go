@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/fatih/color"
@@ -11,9 +12,13 @@ import (
 var wg sync.WaitGroup
 
 func main() {
+	hiWhite := color.New(color.FgHiWhite).Add(color.Bold).SprintFunc()
+
 	flag.Parse()
 	args := flag.Args()
-	fmt.Println("args:", args)
+
+	argsString := "[\"" + strings.Join(args, "\", \"") + "\"]"
+	fmt.Fprintf(color.Output, hiWhite(fmt.Sprintf("Starting commands: %s\n---------------------\n", argsString)))
 
 	procColors := []color.Attribute{
 		color.FgRed,
@@ -34,7 +39,8 @@ func main() {
 	cmdLength := len(args)
 	wg.Add(cmdLength)
 
-	processes := make([]*processData, cmdLength)
+	processes := make(map[int]*processData, cmdLength)
+	messageChannel := make(chan processOutput)
 
 	for i, arg := range args {
 		//fmt.Printf("%d: %s\n", i, arg)
@@ -42,20 +48,30 @@ func main() {
 		process := newProcessData(i, arg, procColor)
 		processes[i] = process
 
-		go handleCommand(process)
+		go handleCommand(process, messageChannel)
 	}
 
+	printDone := make(chan bool)
+	go func(channel <-chan processOutput, done chan<- bool) {
+		for message := range channel {
+			procData := processes[message.procIndex]
+
+			c := color.New(procData.color).SprintFunc()
+			fmt.Fprintf(color.Output, "%s | %s\n", c(procData.name), message.outputLine)
+		}
+		done <- true
+	}(messageChannel, printDone)
+
 	wg.Wait()
+	close(messageChannel)
+	<-printDone
 
-	hiWhite := color.New(color.FgHiWhite).Add(color.Bold).SprintFunc()
-
-	fmt.Fprintf(color.Output, hiWhite("Finished all commands!"))
+	fmt.Fprintf(color.Output, hiWhite("---------------------\nFinished all commands"))
 }
 
-func handleCommand(procInfo *processData) {
+func handleCommand(procInfo *processData, messageChannel chan<- processOutput) {
 	defer wg.Done()
 
-	//procInfo.output <- fmt.Sprintf("Test output from: %s", procInfo.name)
-	//	c := color.New(cmdColor).SprintFunc()
-	//fmt.Fprintf(color.Output, "%v: %s\n", cmdColor, c(cmd))
+	message := fmt.Sprintf("Test output from: %s", procInfo.name)
+	messageChannel <- processOutput{procIndex: procInfo.index, outputLine: message}
 }
