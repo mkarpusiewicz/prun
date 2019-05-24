@@ -31,19 +31,18 @@ func main() {
 
 	procColorsLength := len(procColors)
 
-	// fmt.Println(procColorsLength)
+	cmdLength := len(args)
+	wg.Add(cmdLength)
 
-	// yellow := color.New(procColors[0]).SprintFunc()
-	// red := color.New(procColors[6]).SprintFunc()
-
-	// fmt.Printf("This is a %s and this is %s.\n", yellow("warning"), red("error"))
-
-	wg.Add(len(args))
+	processes := make([]*processData, cmdLength)
 
 	for i, arg := range args {
 		//fmt.Printf("%d: %s\n", i, arg)
-		color := procColors[i%procColorsLength]
-		go handleCommand(arg, color)
+		procColor := procColors[i%procColorsLength]
+		process := newProcessData(i, arg, procColor)
+		processes[i] = process
+
+		go handleCommand(process)
 	}
 
 	wg.Wait()
@@ -53,9 +52,10 @@ func main() {
 	fmt.Fprintf(color.Output, hiWhite("Finished all commands!"))
 }
 
-func handleCommand(cmd string, cmdColor color.Attribute) {
+func handleCommand(procInfo *processData) {
 	defer wg.Done()
 
-	c := color.New(cmdColor).SprintFunc()
-	fmt.Fprintf(color.Output, "%v: %s\n", cmdColor, c(cmd))
+	//procInfo.output <- fmt.Sprintf("Test output from: %s", procInfo.name)
+	//	c := color.New(cmdColor).SprintFunc()
+	//fmt.Fprintf(color.Output, "%v: %s\n", cmdColor, c(cmd))
 }
