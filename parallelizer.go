@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"os/exec"
 	"strings"
 	"sync"
 
@@ -12,6 +14,8 @@ import (
 var wg sync.WaitGroup
 
 func main() {
+	//add verbose mode
+
 	hiWhite := color.New(color.FgHiWhite).Add(color.Bold).SprintFunc()
 
 	flag.Parse()
@@ -75,6 +79,47 @@ func main() {
 func handleCommand(procInfo *processData, messageChannel chan<- processOutput) {
 	defer wg.Done()
 
-	message := fmt.Sprintf("Test output from: %s", procInfo.name)
-	messageChannel <- processOutput{procIndex: procInfo.index, outputLine: message}
+	//always add cmd or bash, check for os
+
+	cmdSlice := strings.Split(procInfo.cmd, " ")
+	cmdString := cmdSlice[0]
+	cmdArgs := cmdSlice[1:]
+
+	cmd := exec.Command(cmdString, cmdArgs...)
+
+	stdOut, _ := cmd.StdoutPipe()
+	stdErr, _ := cmd.StderrPipe()
+
+	cmd.Start()
+
+	cmdOutput, _ := ioutil.ReadAll(stdOut)
+	cmdError, _ := ioutil.ReadAll(stdErr)
+	//cmdOutput, err := cmd.CombinedOutput()
+
+	//read per line
+	//  scanner := bufio.NewScanner(stderr)
+	// scanner.Split(bufio.ScanLines)
+	// for scanner.Scan() {
+	//     m := scanner.Text()
+	//     fmt.Println(m)
+	// }
+
+	// error red
+	//remove empty lines
+
+	if len(cmdOutput) > 0 {
+		messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(cmdOutput)}
+	}
+
+	if len(cmdError) > 0 {
+		messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(cmdError)}
+	}
+
+	// if err != nil {
+	// 	messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(err.Error())}
+	// }
+
+	cmd.Wait()
+
+	//message := fmt.Sprintf("Test output from: %s", procInfo.name)
 }
