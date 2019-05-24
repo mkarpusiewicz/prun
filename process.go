@@ -22,3 +22,16 @@ func newProcessData(index int, cmd string, procColor color.Attribute) *processDa
 		name:  cmd,
 		color: procColor}
 }
+
+type processDataMap map[int]*processData
+
+func (processes *processDataMap) getMaxNameLength() int {
+	maxLength := 0
+	for _, procInfo := range *processes {
+		nameLen := len(procInfo.name)
+		if nameLen > maxLength {
+			maxLength = nameLen
+		}
+	}
+	return maxLength
+}

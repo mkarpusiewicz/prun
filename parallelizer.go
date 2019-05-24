@@ -39,7 +39,7 @@ func main() {
 	cmdLength := len(args)
 	wg.Add(cmdLength)
 
-	processes := make(map[int]*processData, cmdLength)
+	processes := make(processDataMap, cmdLength)
 	messageChannel := make(chan processOutput)
 
 	for i, arg := range args {
@@ -51,7 +51,7 @@ func main() {
 		go handleCommand(process, messageChannel)
 	}
 
-	maxNameLength := getMaxNameLength(processes)
+	maxNameLength := processes.getMaxNameLength()
 
 	printDone := make(chan bool)
 	go func(channel <-chan processOutput, done chan<- bool, maxLength int) {
@@ -77,15 +77,4 @@ func handleCommand(procInfo *processData, messageChannel chan<- processOutput) {
 
 	message := fmt.Sprintf("Test output from: %s", procInfo.name)
 	messageChannel <- processOutput{procIndex: procInfo.index, outputLine: message}
-}
-
-func getMaxNameLength(processes map[int]*processData) int {
-	maxLength := 0
-	for _, procInfo := range processes {
-		nameLen := len(procInfo.name)
-		if nameLen > maxLength {
-			maxLength = nameLen
-		}
-	}
-	return maxLength
 }
