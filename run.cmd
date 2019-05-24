@@ -1,0 +1,1 @@
+@go build && parallelizer.exe cd "dir /B"
