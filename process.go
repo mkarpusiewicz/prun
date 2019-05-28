@@ -27,13 +27,22 @@ func newProcessData(index int, procCmd string, procColor color.Attribute) *proce
 	cmdArgs := cmdSlice[1:]
 
 	path, cmd := filepath.Split(cmdString)
+	name := strings.Join(append([]string{cmd}, cmdArgs...), " ")
+
+	const ellipsis = "..."
+	const desiredLength = 32
+	const maxLength = desiredLength - len(ellipsis)
+
+	if len(name) > maxLength {
+		name = name[:maxLength] + ellipsis
+	}
 
 	return &processData{
 		index: index,
 		path:  path,
 		cmd:   cmd,
 		args:  cmdArgs,
-		name:  cmd,
+		name:  name,
 		color: procColor}
 }
 
