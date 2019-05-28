@@ -1,1 +1,1 @@
-@go build && parallelizer.exe cd "dir /B"
+@go build && parallelizer.exe cd "dir /B" "E:\Development\Projects\Resaiz\minio\run-minio.bat"

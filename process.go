@@ -1,12 +1,20 @@
 package main
 
-import "github.com/fatih/color"
+import (
+	"path/filepath"
+	"strings"
+
+	"github.com/fatih/color"
+)
 
 type processData struct {
-	cmd   string
-	name  string
-	index int
-	color color.Attribute
+	path        string
+	cmd         string
+	args        []string
+	cmdWithArgs string
+	name        string
+	index       int
+	color       color.Attribute
 }
 
 type processOutput struct {
@@ -14,13 +22,24 @@ type processOutput struct {
 	outputLine string
 }
 
-func newProcessData(index int, cmd string, procColor color.Attribute) *processData {
-	// set only specific field value with field key
+func newProcessData(index int, procCmd string, procColor color.Attribute) *processData {
+	cmdSlice := strings.Split(procCmd, " ")
+	cmdString := cmdSlice[0]
+	cmdArgs := cmdSlice[1:]
+
+	path, cmd := filepath.Split(cmdString)
+
+	cmdWithArgsArray := append([]string{cmd}, cmdArgs...)
+	cmdWithArgs := strings.Join(cmdWithArgsArray, " ")
+
 	return &processData{
-		index: index,
-		cmd:   cmd,
-		name:  cmd,
-		color: procColor}
+		index:       index,
+		path:        path,
+		cmd:         cmd,
+		cmdWithArgs: cmdWithArgs,
+		args:        cmdArgs,
+		name:        cmd,
+		color:       procColor}
 }
 
 type processDataMap map[int]*processData
