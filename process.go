@@ -8,13 +8,12 @@ import (
 )
 
 type processData struct {
-	path        string
-	cmd         string
-	args        []string
-	cmdWithArgs string
-	name        string
-	index       int
-	color       color.Attribute
+	path  string
+	cmd   string
+	args  []string
+	name  string
+	index int
+	color color.Attribute
 }
 
 type processOutput struct {
@@ -29,17 +28,13 @@ func newProcessData(index int, procCmd string, procColor color.Attribute) *proce
 
 	path, cmd := filepath.Split(cmdString)
 
-	cmdWithArgsArray := append([]string{cmd}, cmdArgs...)
-	cmdWithArgs := strings.Join(cmdWithArgsArray, " ")
-
 	return &processData{
-		index:       index,
-		path:        path,
-		cmd:         cmd,
-		cmdWithArgs: cmdWithArgs,
-		args:        cmdArgs,
-		name:        cmd,
-		color:       procColor}
+		index: index,
+		path:  path,
+		cmd:   cmd,
+		args:  cmdArgs,
+		name:  cmd,
+		color: procColor}
 }
 
 type processDataMap map[int]*processData
