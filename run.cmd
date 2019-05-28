@@ -1,1 +1,0 @@
-@go build && prun.exe cd "dir /B" "E:\Development\Projects\Resaiz\minio\run-minio.bat"
