@@ -1,1 +1,1 @@
-go install github.com/mkarpusiewicz/parallelizer
+go install github.com/mkarpusiewicz/prun
