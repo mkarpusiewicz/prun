@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os/exec"
 	"strings"
 	"sync"
@@ -98,34 +98,55 @@ func handleCommand(procInfo *processData, messageChannel chan<- processOutput) {
 
 	cmd.Start()
 
-	cmdOutput, _ := ioutil.ReadAll(stdOut)
-	cmdError, _ := ioutil.ReadAll(stdErr)
+	//cmdOutput, _ := ioutil.ReadAll(stdOut)
+	//cmdError, _ := ioutil.ReadAll(stdErr)
 	//cmdOutput, err := cmd.CombinedOutput()
 
 	//read per line
-	//  scanner := bufio.NewScanner(stderr)
-	// scanner.Split(bufio.ScanLines)
-	// for scanner.Scan() {
-	//     m := scanner.Text()
-	//     fmt.Println(m)
-	// }
+
+	stdOutScanner := bufio.NewScanner(stdOut)
+	stdOutScanner.Split(bufio.ScanLines)
+	stdErrScanner := bufio.NewScanner(stdErr)
+	stdErrScanner.Split(bufio.ScanLines)
+
+	var outputWaitGroup sync.WaitGroup
+	outputWaitGroup.Add(2)
+
+	go func() {
+		defer outputWaitGroup.Done()
+
+		for stdOutScanner.Scan() {
+			stdOutText := stdOutScanner.Text()
+			messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(stdOutText)}
+		}
+	}()
+
+	go func() {
+		defer outputWaitGroup.Done()
+
+		for stdErrScanner.Scan() {
+			stdErrText := stdErrScanner.Text()
+			messageChannel <- processOutput{procIndex: procInfo.index, outputLine: color.RedString(string(stdErrText))}
+		}
+	}()
 
 	// error red
 	//remove empty lines
 
-	if len(cmdOutput) > 0 {
-		messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(cmdOutput)}
-	}
+	// if len(cmdOutput) > 0 {
+	// 	messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(cmdOutput)}
+	// }
 
-	if len(cmdError) > 0 {
-		messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(cmdError)}
-	}
+	// if len(cmdError) > 0 {
+	// 	messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(cmdError)}
+	// }
 
 	// if err != nil {
 	// 	messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(err.Error())}
 	// }
 
 	cmd.Wait()
+	outputWaitGroup.Wait()
 
 	//message := fmt.Sprintf("Test output from: %s", procInfo.name)
 }
