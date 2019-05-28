@@ -1,6 +1,6 @@
 # prun
 
-prun is a CLI tool to run commands in parallel with aggregated coloured output like docker-compose.
+prun is a CLI tool to run commands in parallel with aggregated and coloured output like docker-compose.
 
 It a very early version but kind of funcional right now (only Windows, Linux support comming soon).
 
