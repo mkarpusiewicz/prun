@@ -47,7 +47,6 @@ func main() {
 	messageChannel := make(chan processOutput)
 
 	for i, arg := range args {
-		//fmt.Printf("%d: %s\n", i, arg)
 		procColor := procColors[i%procColorsLength]
 		process := newProcessData(i, arg, procColor)
 		processes[i] = process
@@ -77,11 +76,7 @@ func main() {
 }
 
 func getExecCommand(procCmd string) *exec.Cmd {
-	//always add cmd or bash, check for os
-
-	// cmdSlice := strings.Split(procCmd, " ")
-	// cmdString := cmdSlice[0]
-	// cmdArgs := cmdSlice[1:]
+	//check for os, use bash for linux
 
 	cmd := exec.Command("cmd", "/c", procCmd)
 
@@ -97,12 +92,6 @@ func handleCommand(procInfo *processData, messageChannel chan<- processOutput) {
 	stdErr, _ := cmd.StderrPipe()
 
 	cmd.Start()
-
-	//cmdOutput, _ := ioutil.ReadAll(stdOut)
-	//cmdError, _ := ioutil.ReadAll(stdErr)
-	//cmdOutput, err := cmd.CombinedOutput()
-
-	//read per line
 
 	stdOutScanner := bufio.NewScanner(stdOut)
 	stdOutScanner.Split(bufio.ScanLines)
@@ -130,23 +119,6 @@ func handleCommand(procInfo *processData, messageChannel chan<- processOutput) {
 		}
 	}()
 
-	// error red
-	//remove empty lines
-
-	// if len(cmdOutput) > 0 {
-	// 	messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(cmdOutput)}
-	// }
-
-	// if len(cmdError) > 0 {
-	// 	messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(cmdError)}
-	// }
-
-	// if err != nil {
-	// 	messageChannel <- processOutput{procIndex: procInfo.index, outputLine: string(err.Error())}
-	// }
-
 	cmd.Wait()
 	outputWaitGroup.Wait()
-
-	//message := fmt.Sprintf("Test output from: %s", procInfo.name)
 }
