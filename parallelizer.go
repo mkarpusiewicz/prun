@@ -76,16 +76,22 @@ func main() {
 	fmt.Fprintf(color.Output, hiWhite("---------------------\nFinished all commands"))
 }
 
+func getExecCommand(procCmd string) *exec.Cmd {
+	//always add cmd or bash, check for os
+
+	// cmdSlice := strings.Split(procCmd, " ")
+	// cmdString := cmdSlice[0]
+	// cmdArgs := cmdSlice[1:]
+
+	cmd := exec.Command("cmd", "/c", procCmd)
+
+	return cmd
+}
+
 func handleCommand(procInfo *processData, messageChannel chan<- processOutput) {
 	defer wg.Done()
 
-	//always add cmd or bash, check for os
-
-	cmdSlice := strings.Split(procInfo.cmd, " ")
-	cmdString := cmdSlice[0]
-	cmdArgs := cmdSlice[1:]
-
-	cmd := exec.Command(cmdString, cmdArgs...)
+	cmd := getExecCommand(procInfo.cmd)
 
 	stdOut, _ := cmd.StdoutPipe()
 	stdErr, _ := cmd.StderrPipe()
