@@ -1,5 +1,8 @@
 # prun
 
+[![Build Status](https://travis-ci.com/mkarpusiewicz/prun.svg?branch=master)](https://travis-ci.com/mkarpusiewicz/prun)
+[![GitHub license](https://img.shields.io/github/license/mkarpusiewicz/prun.svg)](https://github.com/mkarpusiewicz/prun/blob/master/LICENSE)
+
 prun is a CLI tool to run commands in parallel with aggregated and coloured output like docker-compose.
 
 It a very early version but kind of funcional right now (only Windows, Linux support comming soon).

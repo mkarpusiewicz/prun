@@ -5,12 +5,11 @@ go:
 
 os:
   - linux
-  - windows
 
 cache:
   directories:
-    - $HOME/.cache/go-build
-    - $HOME/gopath/pkg/mod
+    - "$HOME/.cache/go-build"
+    - "$HOME/gopath/pkg/mod"
 
 env:
   - GO111MODULE=on
@@ -23,3 +22,14 @@ git:
   depth: 1
 
 install: true
+
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITHUB_OAUTH_TOKEN
+  file:
+    - prun.exe
+    - prun
+  skip_cleanup: true
+  on:
+    tags: true
