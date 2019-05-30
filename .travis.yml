@@ -23,6 +23,10 @@ git:
 
 install: true
 
+script:
+  - env GOOS=windows GOARCH=amd64 go build -v ./...
+  - env GOOS=linux   GOARCH=amd64 go build -v ./...
+
 deploy:
   provider: releases
   api_key:
