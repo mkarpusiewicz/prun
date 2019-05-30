@@ -1,0 +1,25 @@
+language: go
+
+go:
+  - 1.12.x
+
+os:
+  - linux
+  - windows
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
+
+env:
+  - GO111MODULE=on
+
+branches:
+  only:
+    - master
+
+git:
+  depth: 1
+
+install: true
