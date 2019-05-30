@@ -12,8 +12,14 @@ import (
 	"github.com/fatih/color"
 )
 
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 func main() {
-	//add verbose mode
+	//todo: add verbose mode
 	settings := getSettings()
 	hiWhite := color.New(color.FgHiWhite).Add(color.Bold).SprintFunc()
 
@@ -28,6 +34,22 @@ func main() {
 		done <- true
 	}(output, outputDone)
 
+	//flag parsing
+	flag.Parse()
+	args := flag.Args()
+
+	if len(args) == 0 {
+		output <- fmt.Sprintf("\nprun ver: %v, commit: %v, built at %v\n", color.CyanString(version), color.CyanString(commit), color.CyanString(date))
+		output <- fmt.Sprintf("\n   usage: %s %s %s %s\n", hiWhite("prun"), color.GreenString("cmd1"), color.YellowString("cmd2"), color.BlueString("cmd3"))
+
+		close(output)
+		<-outputDone
+
+		os.Exit(0)
+	}
+
+	output <- hiWhite(fmt.Sprintf("Starting commands: [\"%s\"]\n---------------------\n", strings.Join(args, "\", \"")))
+
 	//signal handling
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -37,11 +59,7 @@ func main() {
 		output <- hiWhite(fmt.Sprintf("---------------------\nTerminating due to signal: %s\n", sig))
 	}(output)
 
-	//flag parsing
-	flag.Parse()
-	args := flag.Args()
-	output <- hiWhite(fmt.Sprintf("Starting commands: [\"%s\"]\n---------------------\n", strings.Join(args, "\", \"")))
-
+	//process handling
 	cmdLength := len(args)
 	processes := make(processDataMap, cmdLength)
 
