@@ -22,3 +22,5 @@ debug
 /install.cmd
 /run.cmd
 /dist
+/prun.exe
+/prun
